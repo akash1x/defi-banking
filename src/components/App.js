@@ -6,6 +6,7 @@ import Web3 from "web3";
 import DaiToken from "../abis/DaiToken.json";
 import DappToken from "../abis/DappToken.json";
 import TokenFarm from "../abis/TokenFarm.json";
+import Main from "./Main";
 
 const App = () => {
   const [account, setAccount] = useState("0x0");
@@ -117,6 +118,31 @@ const App = () => {
     }
   }
 
+  const stakeTokens = (amount) => {
+    setLoading(true);
+    daiToken.methods
+      .approve(tokenFarm._address, amount)
+      .send({ from: account })
+      .on("transactionHash", (hash) => {
+        tokenFarm.methods
+          .stakeTokens(amount)
+          .send({ from: account })
+          .on("transactionHash", (hash) => {
+            setLoading(false);
+          });
+      });
+  };
+
+  const unstakeTokens = () => {
+    setLoading(true);
+    tokenFarm.methods
+      .unstakeTokens()
+      .send({ from: account })
+      .on("transactionHash", (hash) => {
+        setLoading(false);
+      });
+  };
+
   return (
     <div>
       <Navbar account={account} />
@@ -133,8 +159,17 @@ const App = () => {
                 target="_blank"
                 rel="noopener noreferrer"
               ></a>
-
-              <h1>Hello, World!</h1>
+              {loading ? (
+                <h3>Loading ...</h3>
+              ) : (
+                <Main
+                  daiTokenBalance={daiTokenBalance}
+                  dappTokenBalance={dappTokenBalance}
+                  stakingBalance={stakingBalance}
+                  stakeTokens={stakeTokens}
+                  unstakeTokens={unstakeTokens}
+                />
+              )}
             </div>
           </main>
         </div>
