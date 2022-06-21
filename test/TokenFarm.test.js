@@ -96,6 +96,51 @@ contract("TokenFarm", (accounts) => {
         "true",
         "investor staking status correct after staking"
       );
+
+      //Issue Tokens
+      await tokenFarm.issueTokens({ from: accounts[0] });
+
+      result = await dappToken.balanceOf(accounts[1]);
+      assert.equal(
+        result.toString(),
+        tokens("100"),
+        "investor DApp Token wallet balance correct after issuance"
+      );
+
+      //Ensure that only owner can call it. We can try call below function from another account here investor is calling to check basically.
+      await tokenFarm.issueTokens({ from: accounts[1] }).should.be.rejected;
+
+      //Unstake tokens
+      await tokenFarm.unstakeTokens({ from: accounts[1] });
+
+      //Check result after unstaking
+      result = await daiToken.balanceOf(accounts[1]);
+      assert.equal(
+        result.toString(),
+        tokens("100"),
+        "investor Mock DAI wallet balance correct after unstaking"
+      );
+
+      result = await daiToken.balanceOf(tokenFarm.address);
+      assert.equal(
+        result.toString(),
+        tokens("0"),
+        "Token Farm Mock DAI wallet balance correct after unstaking"
+      );
+
+      result = await tokenFarm.stakingBalance(accounts[1]);
+      assert.equal(
+        result.toString(),
+        tokens("0"),
+        "Investor staking balance correct after unstaking"
+      );
+
+      result = await tokenFarm.isStaking(accounts[1]);
+      assert.equal(
+        result.toString(),
+        "false",
+        "Investor staking status correct after unstaking"
+      );
     });
   });
 });
