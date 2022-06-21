@@ -8,13 +8,18 @@ import DappToken from "../abis/DappToken.json";
 import TokenFarm from "../abis/TokenFarm.json";
 
 const App = () => {
-  const [account, setAccount] = useState("");
+  const [account, setAccount] = useState("0x0");
   const [daiToken, setDaiToken] = useState({});
+  const [dappToken, setDappToken] = useState({});
+  const [tokenFarm, setTokenFarm] = useState({});
   const [daiTokenBalance, setDaiTokenBalance] = useState("0");
+  const [dappTokenBalance, setDappTokenBalance] = useState("0");
+  const [stakingBalance, setStakingBalance] = useState("0");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     connectToWeb3();
+    console.log("first");
   }, []);
 
   async function connectToWeb3() {
@@ -26,11 +31,10 @@ const App = () => {
     const web3 = window.web3;
     const accounts = await web3.eth.getAccounts();
     console.log(accounts[0]);
-    // setAccount(accounts[0]);
+    setAccount(accounts[0]);
 
     const networkId = await web3.eth.net.getId();
     console.log(networkId);
-    //setNetworkId(networkId);
 
     //Load DaiToken
     const daiTokenData = DaiToken.networks[networkId];
@@ -40,14 +44,14 @@ const App = () => {
         DaiToken.abi,
         daiTokenData.address
       );
-      // console.log(daiToken);
-      // setDaiToken(daiToken);
+      console.log(daiToken);
+      setDaiToken(daiToken);
       console.log(daiToken);
       let daiTokenBalance = await daiToken.methods
         .balanceOf(accounts[0])
         .call();
       console.log(daiTokenBalance);
-      // setDaiTokenBalance(daiTokenBalance.toString());
+      setDaiTokenBalance(daiTokenBalance);
     } else {
       window.alert(
         `DApp Token contract not deployed to detected network: ${networkId}`
@@ -62,14 +66,14 @@ const App = () => {
         DappToken.abi,
         dappTokenData.address
       );
-      // console.log(daiToken);
-      // setDaiToken(daiToken);
+      console.log(dappToken);
+      setDappToken(dappToken);
       console.log(dappToken);
       let dappTokenBalance = await dappToken.methods
         .balanceOf(accounts[0])
         .call();
       console.log(dappTokenBalance);
-      // setDaiTokenBalance(daiTokenBalance.toString());
+      setDappTokenBalance(dappTokenBalance);
     } else {
       window.alert(
         `DAI Token contract not deployed to detected network: ${networkId}`
@@ -84,14 +88,14 @@ const App = () => {
         TokenFarm.abi,
         tokenFarmData.address
       );
-      // console.log(daiToken);
-      // setDaiToken(daiToken);
-      console.log(dappToken);
+      console.log(tokenFarm);
+      setTokenFarm(tokenFarm);
+
       let stakingBalance = await tokenFarm.methods
-        .balanceOf(accounts[0])
+        .stakingBalance(accounts[0])
         .call();
       console.log(stakingBalance);
-      // setDaiTokenBalance(daiTokenBalance.toString());
+      setStakingBalance(stakingBalance);
     } else {
       window.alert(
         `Token Farm contract not deployed to detected network: ${networkId}`
