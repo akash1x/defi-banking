@@ -8,8 +8,35 @@ contract TokenFarm {
     DappToken public dappToken;
     DaiToken public daiToken;
 
+    address[] public stakers;
+    mapping(address => uint256) public stakingBalance;
+    mapping(address => bool) public hasStaked;
+    mapping(address => bool) public isStaking;
+
     constructor(DappToken _dappToken, DaiToken _daiToken) public {
         dappToken = _dappToken;
         daiToken = _daiToken;
     }
+
+    // Stakes tokens (Deposit)
+    function stakeTokens(uint256 _amount) public {
+        /*
+        msg.sender: Investor
+        address(this): address of TokenFarm contract
+        transferFrom is a delegated transfer call from DaiToken
+        */
+        daiToken.transferFrom(msg.sender, address(this), _amount);
+
+        //Update staking balance
+        stakingBalance[msg.sender] = stakingBalance[msg.sender] + _amount;
+
+        //Add user to stakers array only if they haven't staked already
+        if (!hasStaked[msg.sender]) {
+            stakers.push(msg.sender);
+        }
+        isStaking[msg.sender] = true;
+        hasStaked[msg.sender] = true;
+    }
+    // Unstake tokens (Withdraw)
+    // Issuing Tokens
 }
