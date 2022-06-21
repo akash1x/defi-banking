@@ -3,15 +3,20 @@ import "./App.css";
 import React from "react";
 import { useState, useEffect } from "react";
 import Web3 from "web3";
+import DaiToken from "../abis/DaiToken.json";
+import DappToken from "../abis/DappToken.json";
+import TokenFarm from "../abis/TokenFarm.json";
 
 const App = () => {
-  const [account, setAccount] = useState("0x0");
-  const [networkId, setNetworkId] = useState(0);
+  const [account, setAccount] = useState("");
   const [daiToken, setDaiToken] = useState({});
-  const [daiTokenBalance, setDaiTokenBalance] = useState("");
+  const [daiTokenBalance, setDaiTokenBalance] = useState("0");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    connectToWeb3();setNetworkId
+    connectToWeb3();
+  }, []);
+
   async function connectToWeb3() {
     await loadWeb3();
     await loadBlockChainData();
@@ -20,14 +25,80 @@ const App = () => {
   async function loadBlockChainData() {
     const web3 = window.web3;
     const accounts = await web3.eth.getAccounts();
-    console.log(accounts);
-    setAccount(accounts[0]);
+    console.log(accounts[0]);
+    // setAccount(accounts[0]);
 
     const networkId = await web3.eth.net.getId();
     console.log(networkId);
-    setNetworkId(networkId);
-  }
+    //setNetworkId(networkId);
 
+    //Load DaiToken
+    const daiTokenData = DaiToken.networks[networkId];
+    console.log(daiTokenData);
+    if (daiTokenData) {
+      const daiToken = new web3.eth.Contract(
+        DaiToken.abi,
+        daiTokenData.address
+      );
+      // console.log(daiToken);
+      // setDaiToken(daiToken);
+      console.log(daiToken);
+      let daiTokenBalance = await daiToken.methods
+        .balanceOf(accounts[0])
+        .call();
+      console.log(daiTokenBalance);
+      // setDaiTokenBalance(daiTokenBalance.toString());
+    } else {
+      window.alert(
+        `DApp Token contract not deployed to detected network: ${networkId}`
+      );
+    }
+
+    //Load Dapp Token
+    const dappTokenData = DappToken.networks[networkId];
+    console.log(dappTokenData);
+    if (dappTokenData) {
+      const dappToken = new web3.eth.Contract(
+        DappToken.abi,
+        dappTokenData.address
+      );
+      // console.log(daiToken);
+      // setDaiToken(daiToken);
+      console.log(dappToken);
+      let dappTokenBalance = await dappToken.methods
+        .balanceOf(accounts[0])
+        .call();
+      console.log(dappTokenBalance);
+      // setDaiTokenBalance(daiTokenBalance.toString());
+    } else {
+      window.alert(
+        `DAI Token contract not deployed to detected network: ${networkId}`
+      );
+    }
+
+    //Load Token Farm
+    const tokenFarmData = TokenFarm.networks[networkId];
+    console.log(tokenFarmData);
+    if (tokenFarmData) {
+      const tokenFarm = new web3.eth.Contract(
+        TokenFarm.abi,
+        tokenFarmData.address
+      );
+      // console.log(daiToken);
+      // setDaiToken(daiToken);
+      console.log(dappToken);
+      let stakingBalance = await tokenFarm.methods
+        .balanceOf(accounts[0])
+        .call();
+      console.log(stakingBalance);
+      // setDaiTokenBalance(daiTokenBalance.toString());
+    } else {
+      window.alert(
+        `Token Farm contract not deployed to detected network: ${networkId}`
+      );
+    }
+    setLoading(false);
+  }
   //Connecting app to metamask
   async function loadWeb3() {
     if (window.ethereum) {
